@@ -1,0 +1,467 @@
+;; Verified public-register citations for the legal entity archived by this repository.
+;;
+;; Every row is checked live by tools/verify_citations.cljs:
+;;   * GET :cite/url must answer HTTP 2xx
+;;   * :cite/expect-substring must appear in the response body
+;;
+;; A URL that cannot be fetched, or whose body no longer carries the claim, is a
+;; DRIFT and fails the gate. Nothing is recorded here that was not retrieved.
+;;
+;; THREE independent authorities are cited, not one:
+;;   * GLEIF, the global LEI system
+;;   * the United States, via the SEC's EDGAR submissions API (HDFC Bank is a
+;;     foreign private issuer, NYSE ticker HDB, CIK 0001144967)
+;;   * the issuer itself, at its own published website www.hdfc.bank.in -- the
+;;     domain sits in the .bank.in zone the Reserve Bank of India reserved for
+;;     Indian banks, but that zone policy is not itself cited (no per-entity
+;;     GET URL publishes the zone's allocation records)
+;;
+;; WHY THE INDIAN REGISTER OF RECORD IS NOT CITED. GLEIF names RA000394 -- the
+;; Companies Register kept by the Ministry of Corporate Affairs -- as BOTH the
+;; register of record and the validation authority for this entity (rows
+;; gleif-registered-at and gleif-validated-at). That register publishes no
+;; per-entity GET URL: www.mca.gov.in answered HTTP 403 to this gate's client
+;; when measured (2026-08-22), and the per-entity "View Company Master Data"
+;; lookup runs behind POST/captcha flows this gate cannot replay. NSE and BSE
+;; quote pages were considered and not cited: both sit behind POST/JS-gated
+;; APIs, and a search page that echoes the query is not a citation. So the
+;; entity's own Indian company number (CIN L65920MH1994PLC080618) rests on
+;; GLEIF alone. What the catalog does instead is corroborate the entity through
+;; a second STATE authority that does answer on stable URLs:
+;;
+;;   GLEIF says the legal seat is HDFC BANK HOUSE, Senapati Bapat Marg, Lower
+;;   Parel (West), Mumbai 400013 (rows gleif-address, gleif-city, gleif-postal)
+;;   -> the SEC prints 'HDFC BANK HOUSE', SENAPATI BAPAT ROAD / LOWER PAREL
+;;   (WEST), MUMBAI INDIA in its own business-address record (rows sec-street,
+;;   sec-street2). GLEIF records the legal name HDFC BANK LIMITED -> EDGAR
+;;   prints HDFC BANK LTD as the registrant name, incorporated in India,
+;;   NYSE ticker HDB. The SEC and GLEIF never consulted each other.
+;;
+;; WHAT IS DELIBERATELY NOT CITED. GLEIF's nextRenewalDate and lastUpdateDate
+;; move by construction; a row on either would go red on schedule while saying
+;; nothing about the entity, so they are left out. The RBI's bank-licence
+;; records publish no stable per-entity GET URL and are not cited.
+;;
+;; :cite/row-kind is the honest part of this catalog and should be read before
+;; the claims:
+;;
+;;   :identity   the substring names this entity, its identifiers, or a specific
+;;               related legal entity (the four direct children, the ADS ISIN).
+;;               Point the URL at a different company and the row fails.
+;;   :attribute  the substring is TRUE OF THIS ENTITY BUT NOT ONLY OF IT (status
+;;               ACTIVE, country IN, city MUMBAI, SIC 6029). Such a row can
+;;               survive a swap to a similar company. It is recorded because it
+;;               is checked and true, not because it identifies.
+;;   :definition the row resolves a code used by another row (RA000394, NBCI,
+;;               the managing LOU). It says the named register, legal form or
+;;               LEI issuer exists; it says nothing about HDFC Bank.
+;;
+;; Of the entries below, 27 are :identity, 26 are :attribute and 8 are
+;; :definition. A reader who treats all 61 as identifying would overstate what
+;; this catalog proves -- which is the error this field exists to prevent.
+;;
+;; Substrings are taken from the RAW response body and were each checked against
+;; the fetched bytes before this file was written (2026-08-22, GLEIF golden copy
+;; of 2026-08-21). The child-count and isin-count rows go red when GLEIF adds or
+;; removes a relationship; that is correct DRIFT, not a false alarm. GLEIF
+;; escapes URL slashes in its JSON (in\/L65920..., https:\/\/...); the ocid,
+;; ra-website and lou-website rows match that raw escaped form deliberately.
+{:catalog/subject
+ #:company{:legal-name "HDFC BANK LIMITED"
+           :lei "335800ZQ6I4E2JXENC50"
+           :jurisdiction "IN"
+           :registered-at "RA000394"
+           :registered-as "L65920MH1994PLC080618"
+           :legal-form "NBCI"
+           :website "https://www.hdfc.bank.in/"}
+ :catalog/authorities
+ [{:authority/id :gleif
+   :authority/name "Global Legal Entity Identifier Foundation"
+   :authority/root "https://api.gleif.org/"}
+  {:authority/id :us-sec
+   :authority/name "U.S. Securities and Exchange Commission, EDGAR"
+   :authority/root "https://data.sec.gov/"}
+  {:authority/id :issuer
+   :authority/name "HDFC Bank Limited, at its own published website"
+   :authority/root "https://www.hdfc.bank.in/"}]
+ :catalog/unreachable
+ [{:unreachable/authority "Companies Register, Ministry of Corporate Affairs (RA000394)"
+   :unreachable/url "https://www.mca.gov.in/"
+   :unreachable/observed "HTTP 403 to this gate's client (2026-08-22); the per-entity View Company Master Data lookup runs behind POST/captcha flows"
+   :unreachable/consequence "The register GLEIF names as this entity's register of record and validation authority is NOT cited below. The CIN L65920MH1994PLC080618 rests on GLEIF alone."}
+  {:unreachable/authority "NSE / BSE listing records (ticker HDFCBANK)"
+   :unreachable/url "https://www.nseindia.com/"
+   :unreachable/observed "per-entity quote data sits behind POST/JS-gated APIs"
+   :unreachable/consequence "Rejected deliberately. A search-echo row would pass forever and prove nothing. The listed-company corroboration below comes from the US SEC instead (NYSE-listed ADS, ticker HDB)."}]
+ :catalog/entries
+ [
+  {:cite/id "gleif-lei"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"lei\":\"335800ZQ6I4E2JXENC50\""
+   :cite/claim "GLEIF issues LEI 335800ZQ6I4E2JXENC50."}
+  {:cite/id "gleif-legal-name"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"legalName\":{\"name\":\"HDFC BANK LIMITED\",\"language\":\"en\"}"
+   :cite/claim "The legal name on that LEI is HDFC BANK LIMITED, recorded in English. Corroborated independently by sec-name."}
+  {:cite/id "gleif-registered-as"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"registeredAs\":\"L65920MH1994PLC080618\""
+   :cite/claim "The register of record carries this entity as CIN L65920MH1994PLC080618 -- a Maharashtra-registered listed public company (L..MH1994PLC..) incorporated 1994."}
+  {:cite/id "gleif-validated-as"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"validatedAs\":\"L65920MH1994PLC080618\""
+   :cite/claim "The LOU validated the registration against the same CIN, not a different one."}
+  {:cite/id "gleif-registered-at"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"registeredAt\":{\"id\":\"RA000394\""
+   :cite/claim "The register of record is RA000394. Resolved by the gleif-ra-* definition rows; NOT directly citable (see :catalog/unreachable)."}
+  {:cite/id "gleif-validated-at"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"validatedAt\":{\"id\":\"RA000394\""
+   :cite/claim "The validation authority is the same register, RA000394."}
+  {:cite/id "gleif-address"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"addressLines\":[\"HDFC BANK HOUSE\",\"SENAPATI BAPAT MARG , LOWER PAREL (WEST)\"]"
+   :cite/claim "The legal seat is HDFC BANK HOUSE, Senapati Bapat Marg, Lower Parel (West). The SEC prints the same building in its own record (sec-street)."}
+  {:cite/id "gleif-city"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"city\":\"MUMBAI\""
+   :cite/claim "The legal seat city is Mumbai."}
+  {:cite/id "gleif-region"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"region\":\"IN-MH\""
+   :cite/claim "The legal seat region is IN-MH, Maharashtra -- consistent with the MH in the CIN."}
+  {:cite/id "gleif-postal"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"postalCode\":\"400013\""
+   :cite/claim "The legal seat postal code is 400013 (Lower Parel, Mumbai)."}
+  {:cite/id "gleif-jurisdiction"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"jurisdiction\":\"IN\""
+   :cite/claim "The jurisdiction is India."}
+  {:cite/id "gleif-legal-form"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"legalForm\":{\"id\":\"NBCI\""
+   :cite/claim "The entity legal form is ELF code NBCI. Resolved by the gleif-elf-* definition rows."}
+  {:cite/id "gleif-category"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"category\":\"GENERAL\""
+   :cite/claim "The LEI entity category is GENERAL (not BRANCH, FUND or SOLE_PROPRIETOR) -- this record is the parent legal entity itself."}
+  {:cite/id "gleif-status-active"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"status\":\"ACTIVE\""
+   :cite/claim "The entity status is ACTIVE."}
+  {:cite/id "gleif-reg-status-issued"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"status\":\"ISSUED\""
+   :cite/claim "The LEI registration status is ISSUED (also matches the entity ACTIVE row; both are checked)."}
+  {:cite/id "gleif-creation-date"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"creationDate\":\"1994-08-29T18:30:00Z\""
+   :cite/claim "GLEIF records the entity creation date as 1994-08-29 -- consistent with the 1994 in the CIN."}
+  {:cite/id "gleif-initial-registration"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"initialRegistrationDate\":\"2015-02-26T07:33:21Z\""
+   :cite/claim "The LEI itself was first issued 2015-02-26."}
+  {:cite/id "gleif-managing-lou"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"managingLou\":\"335800FVH4MOKZS9VH40\""
+   :cite/claim "The managing LOU is 335800FVH4MOKZS9VH40. Resolved by the gleif-lou-* definition rows to Legal Entity Identifier India Limited."}
+  {:cite/id "gleif-corroboration"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"corroborationLevel\":\"FULLY_CORROBORATED\""
+   :cite/claim "The registration is FULLY_CORROBORATED against the register of record."}
+  {:cite/id "gleif-conformity"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"conformityFlag\":\"CONFORMING\""
+   :cite/claim "The LEI record's conformity flag is CONFORMING."}
+  {:cite/id "gleif-bic"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"bic\":[\"HDFCBHBMXXX\",\"HDFCHKHHXXX\",\"HDFCINBBXXX\",\"HDFCSGSGXXX\"]"
+   :cite/claim "Four SWIFT BICs map to this LEI, including HDFCINBBXXX -- the bank's primary India BIC -- plus Bahrain, Hong Kong and Singapore codes."}
+  {:cite/id "gleif-ocid"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"ocid\":\"in\\/L65920MH1994PLC080618\""
+   :cite/expect-note "GLEIF escapes the slash; the raw bytes are in\\/L65920... -- this row keeps that encoding fact checked"
+   :cite/claim "The OpenCorporates identifier is in/L65920MH1994PLC080618 -- the same CIN, in a third identifier system."}
+  {:cite/id "gleif-qcc"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"qcc\":\"QIN91KGCN7\""
+   :cite/claim "The QCC cross-reference for this LEI is QIN91KGCN7."}
+  {:cite/id "gleif-spglobal"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50"
+   :cite/expect-substring "\"spglobal\":[\"101677\"]"
+   :cite/claim "S&P Global's company identifier 101677 maps to this LEI."}
+  {:cite/id "gleif-no-parent-category"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-parent-reporting-exception"
+   :cite/expect-substring "\"category\":\"DIRECT_ACCOUNTING_CONSOLIDATION_PARENT\""
+   :cite/claim "For the direct accounting-consolidation parent, GLEIF holds a reporting exception, not a parent record."}
+  {:cite/id "gleif-no-parent-reason"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-parent-reporting-exception"
+   :cite/expect-substring "\"reason\":\"NO_KNOWN_PERSON\""
+   :cite/claim "The exception reason is NO_KNOWN_PERSON -- no entity consolidates HDFC Bank; it is the top of its accounting group. (Before the 2023 merger, HDFC Ltd was the parent; the exception postdates that.)"}
+  {:cite/id "gleif-child-count"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"total\":4"
+   :cite/claim "GLEIF relationship records name exactly 4 direct children. Goes red when GLEIF adds or removes one -- correct DRIFT."}
+  {:cite/id "gleif-child-amc-name"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"name\":\"HDFC ASSET MANAGEMENT COMPANY LIMITED\""
+   :cite/claim "HDFC Asset Management Company Limited reports HDFC Bank as its direct parent."}
+  {:cite/id "gleif-child-amc-lei"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"lei\":\"3358002FLK8AK8WSEP31\""
+   :cite/claim "That child's own LEI is 3358002FLK8AK8WSEP31."}
+  {:cite/id "gleif-child-securities-name"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"name\":\"HDFC SECURITIES LIMITED\""
+   :cite/claim "HDFC Securities Limited reports HDFC Bank as its direct parent."}
+  {:cite/id "gleif-child-securities-lei"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"lei\":\"335800XZ1B1RACI2RY08\""
+   :cite/claim "That child's own LEI is 335800XZ1B1RACI2RY08."}
+  {:cite/id "gleif-child-securities-cin"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"registeredAs\":\"U67120MH2000PLC152193\""
+   :cite/claim "The child HDFC Securities carries its own distinct CIN (U67120MH2000PLC152193) -- an unlisted (U) Maharashtra company, unlike the parent's listed (L) CIN."}
+  {:cite/id "gleif-child-hdb-name"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"name\":\"HDB FINANCIAL SERVICES LIMITED\""
+   :cite/claim "HDB Financial Services Limited reports HDFC Bank as its direct parent."}
+  {:cite/id "gleif-child-hdb-lei"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"lei\":\"335800WLGF5TDN2DEO63\""
+   :cite/claim "That child's own LEI is 335800WLGF5TDN2DEO63."}
+  {:cite/id "gleif-child-ergo-name"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"name\":\"HDFC ERGO GENERAL INSURANCE COMPANY LIMITED\""
+   :cite/claim "HDFC ERGO General Insurance Company Limited reports HDFC Bank as its direct parent."}
+  {:cite/id "gleif-child-ergo-lei"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/direct-children"
+   :cite/expect-substring "\"lei\":\"529900XS7H6CPQS1IO14\""
+   :cite/claim "That child's own LEI is 529900XS7H6CPQS1IO14 -- a 5299 (GLEIF-prefix era) LEI, unlike the 3358 LEIL-issued siblings."}
+  {:cite/id "gleif-isin-count"
+   :cite/authority :gleif
+   :cite/row-kind :attribute
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/isins"
+   :cite/expect-substring "\"total\":5"
+   :cite/claim "GLEIF's ISIN mapping carries 5 ISINs for this LEI. Goes red when the mapping changes -- correct DRIFT."}
+  {:cite/id "gleif-isin-ads"
+   :cite/authority :gleif
+   :cite/row-kind :identity
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/isins"
+   :cite/expect-substring "\"isin\":\"US40415F2002\""
+   :cite/claim "US40415F2002 -- the US ISIN of the NYSE-listed American Depositary Shares -- maps to this LEI, tying the GLEIF record to the security the SEC rows describe."}
+  {:cite/id "gleif-ra-name"
+   :cite/authority :gleif
+   :cite/row-kind :definition
+   :cite/url "https://api.gleif.org/api/v1/registration-authorities/RA000394"
+   :cite/expect-substring "\"internationalName\":\"Companies Register\""
+   :cite/claim "RA000394 is a Companies Register. This row defines the code; it says nothing about HDFC Bank."}
+  {:cite/id "gleif-ra-org"
+   :cite/authority :gleif
+   :cite/row-kind :definition
+   :cite/url "https://api.gleif.org/api/v1/registration-authorities/RA000394"
+   :cite/expect-substring "\"internationalOrganizationName\":\"Ministry of Corporate Affairs\""
+   :cite/claim "The register is kept by the Ministry of Corporate Affairs (India)."}
+  {:cite/id "gleif-ra-website"
+   :cite/authority :gleif
+   :cite/row-kind :definition
+   :cite/url "https://api.gleif.org/api/v1/registration-authorities/RA000394"
+   :cite/expect-substring "\"website\":\"http:\\/\\/www.mca.gov.in\\/MCA21\\/\""
+   :cite/expect-note "raw GLEIF bytes escape the slashes"
+   :cite/claim "GLEIF records the register's website as www.mca.gov.in/MCA21/ -- the site :catalog/unreachable documents as answering 403 to this gate."}
+  {:cite/id "gleif-elf-name"
+   :cite/authority :gleif
+   :cite/row-kind :definition
+   :cite/url "https://api.gleif.org/api/v1/entity-legal-forms/NBCI"
+   :cite/expect-substring "\"localName\":\"Banking Company - Others\""
+   :cite/claim "ELF code NBCI means Banking Company - Others. This row defines the code used by gleif-legal-form."}
+  {:cite/id "gleif-elf-country"
+   :cite/authority :gleif
+   :cite/row-kind :definition
+   :cite/url "https://api.gleif.org/api/v1/entity-legal-forms/NBCI"
+   :cite/expect-substring "\"country\":\"India\""
+   :cite/claim "NBCI is an Indian legal form."}
+  {:cite/id "gleif-lou-name"
+   :cite/authority :gleif
+   :cite/row-kind :definition
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/lei-issuer"
+   :cite/expect-substring "\"name\":\"Legal Entity Identifier India Limited\""
+   :cite/claim "The managing LOU 335800FVH4MOKZS9VH40 is Legal Entity Identifier India Limited."}
+  {:cite/id "gleif-lou-marketing"
+   :cite/authority :gleif
+   :cite/row-kind :definition
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/lei-issuer"
+   :cite/expect-substring "\"marketingName\":\"LEIL\""
+   :cite/claim "It trades as LEIL (a CCIL group company)."}
+  {:cite/id "gleif-lou-website"
+   :cite/authority :gleif
+   :cite/row-kind :definition
+   :cite/url "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50/lei-issuer"
+   :cite/expect-substring "\"website\":\"https:\\/\\/www.ccilindia-lei.co.in\\/\""
+   :cite/expect-note "raw GLEIF bytes escape the slashes"
+   :cite/claim "LEIL's website is www.ccilindia-lei.co.in."}
+  {:cite/id "sec-name"
+   :cite/authority :us-sec
+   :cite/row-kind :identity
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"name\":\"HDFC BANK LTD\""
+   :cite/claim "The SEC's registrant record prints HDFC BANK LTD -- the same legal name GLEIF records, in the SEC's own abbreviation. The two never consulted each other."}
+  {:cite/id "sec-cik"
+   :cite/authority :us-sec
+   :cite/row-kind :identity
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"cik\":\"0001144967\""
+   :cite/claim "The SEC knows this registrant as CIK 0001144967."}
+  {:cite/id "sec-ticker"
+   :cite/authority :us-sec
+   :cite/row-kind :identity
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"tickers\":[\"HDB\"]"
+   :cite/claim "The registrant's ticker is HDB."}
+  {:cite/id "sec-exchange"
+   :cite/authority :us-sec
+   :cite/row-kind :attribute
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"exchanges\":[\"NYSE\"]"
+   :cite/claim "The ADS trade on the NYSE."}
+  {:cite/id "sec-sic"
+   :cite/authority :us-sec
+   :cite/row-kind :attribute
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"sic\":\"6029\""
+   :cite/claim "The SEC classifies the registrant under SIC 6029."}
+  {:cite/id "sec-sic-desc"
+   :cite/authority :us-sec
+   :cite/row-kind :attribute
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"sicDescription\":\"Commercial Banks, NEC\""
+   :cite/claim "SIC 6029 is Commercial Banks, NEC -- a bank, as the ELF row also says via NBCI."}
+  {:cite/id "sec-incorporation"
+   :cite/authority :us-sec
+   :cite/row-kind :attribute
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"stateOfIncorporationDescription\":\"India\""
+   :cite/claim "Incorporated in India."}
+  {:cite/id "sec-street"
+   :cite/authority :us-sec
+   :cite/row-kind :identity
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"street1\":\"'HDFC BANK HOUSE', SENAPATI BAPAT ROAD\""
+   :cite/claim "The SEC's business-address record names the same building GLEIF records as the legal seat: HDFC BANK HOUSE on Senapati Bapat Marg/Road."}
+  {:cite/id "sec-street2"
+   :cite/authority :us-sec
+   :cite/row-kind :attribute
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"street2\":\"LOWER PAREL (WEST), MUMBAI INDIA\""
+   :cite/claim "...in Lower Parel (West), Mumbai -- matching GLEIF's address line and city."}
+  {:cite/id "sec-mailing-street"
+   :cite/authority :us-sec
+   :cite/row-kind :attribute
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"street2\":\"SENAPATI BAPAT MARG, LOWER PAREL\""
+   :cite/claim "The mailing address also sits on Senapati Bapat Marg, Lower Parel."}
+  {:cite/id "sec-fiscal-year"
+   :cite/authority :us-sec
+   :cite/row-kind :attribute
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"fiscalYearEnd\":\"0331\""
+   :cite/claim "The fiscal year ends 31 March -- the Indian financial year."}
+  {:cite/id "sec-20f"
+   :cite/authority :us-sec
+   :cite/row-kind :attribute
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"20-F\""
+   :cite/claim "The recent-filings list carries a 20-F -- the annual report form reserved for foreign private issuers."}
+  {:cite/id "sec-phone"
+   :cite/authority :us-sec
+   :cite/row-kind :identity
+   :cite/url "https://data.sec.gov/submissions/CIK0001144967.json"
+   :cite/expect-substring "\"phone\":\"91224957676\""
+   :cite/claim "The SEC records a +91 22 Mumbai phone number for the registrant."}
+  {:cite/id "issuer-tos-title"
+   :cite/authority :issuer
+   :cite/row-kind :identity
+   :cite/url "https://www.hdfc.bank.in/mutual-funds/terms-and-conditions"
+   :cite/expect-substring "Mutual Funds Terms And Conditions | Investment Guidelines | HDFC Bank"
+   :cite/claim "The page this repository archives (80-data/public/tos.journal.edn, retrieved 2026-07-25) still serves the same Terms and Conditions title, naming HDFC Bank."}
+  {:cite/id "issuer-home-title"
+   :cite/authority :issuer
+   :cite/row-kind :identity
+   :cite/url "https://www.hdfc.bank.in/"
+   :cite/expect-substring "<title>Personal Banking &amp; Netbanking Services | HDFC Bank</title>"
+   :cite/claim "The issuer's homepage on the RBI-reserved .bank.in zone titles itself HDFC Bank -- the site blueprint.edn records as the entity's website."}
+ ]}
