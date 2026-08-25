@@ -1,0 +1,25 @@
+;; facts.edn — GLEIF LEI レコードから取り込んだ法人レベルの事実。
+;; 生成物: scripts/lei-gleif-ingest.cljs（手編集しない）。
+;; 出典 https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50 を 2026-08-25 に GET（HTTP 200）。応答本文の sha256 を同梱。
+;; fact/conflict は blueprint.edn の既存値と食い違った key。どちらも消していない。
+[["gleif-335800zq6i4e2jxenc50" "company/lei" "335800ZQ6I4E2JXENC50" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "fact/source-url" "https://api.gleif.org/api/v1/lei-records/335800ZQ6I4E2JXENC50" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "fact/retrieved-at" "2026-08-25" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "fact/response-sha256" "c0c5493e5b1c99ebd82b5c8a1e0b5e5deed646efbc0131db2778620938d7fb08" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "source/dataset" "cloud-itonami-lei-gleif" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/legal-name" "HDFC BANK LIMITED" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/legal-address" "HDFC BANK HOUSE, SENAPATI BAPAT MARG , LOWER PAREL (WEST), 400013, MUMBAI, IN-MH, IN" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/headquarters-address" "HDFC BANK HOUSE, SENAPATI BAPAT MARG , LOWER PAREL (WEST), 400013, MUMBAI, IN-MH, IN" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/registered-as" "L65920MH1994PLC080618" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/registration-authority" "RA000394" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/jurisdiction" "IN" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/category" "GENERAL" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/legal-form-elf" "NBCI" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/entity-status" "ACTIVE" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/entity-creation-date" "1994-08-29T18:30:00Z" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/registration-status" "ISSUED" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/initial-registration-date" "2015-02-26T07:33:21Z" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/last-update-date" "2025-12-11T10:27:41Z" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/next-renewal-date" "2027-02-06T18:30:00Z" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/managing-lou" "335800FVH4MOKZS9VH40" 1 :add]
+ ["gleif-335800zq6i4e2jxenc50" "gleif/corroboration-level" "FULLY_CORROBORATED" 1 :add]]
